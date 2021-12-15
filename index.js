@@ -186,16 +186,13 @@ async function prompt({
       throw new Error('No courses found!!!')
     }
 
+    //videos download
     const lessonMsg = ora('start videos download..').start()
-    //let filteredJson = json.courses.filter(course => !course?.done)
-
     const scheduler = new AllScheduler(workers, { concurrency, json, perPage: 1, subtitle })
-
     const interval = setInterval(async _ => {
       const stats = scheduler.stats
       lessonMsg.text = `videos downloading.. [${stats.completed}/${stats.totals}] -`// Course: ${stats?.video.join(', ')} Concurrency ${stats.page}
     }, 250)
-
     const count = await scheduler.run()
     clearInterval(interval)
     lessonMsg.succeed(`complete lesson download.. (${count})`)
