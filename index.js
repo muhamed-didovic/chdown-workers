@@ -49,37 +49,13 @@ const cli = meow(`
       $ coursehunters -e user@gmail.com -p password -d path-to-directory -t source
 `, {
   flags: {
-    email      : {
-      type : 'string',
-      alias: 'e'
-    },
-    password   : {
-      type : 'string',
-      alias: 'p'
-    },
-    directory  : {
-      type : 'string',
-      alias: 'd'
-    },
-    type       : {
-      type : 'string',
-      alias: 't'
-    },
-    code       : {
-      type   : 'boolean',
-      alias  : 'c',
-      default: true
-    },
-    zip        : {
-      type   : 'boolean',
-      alias  : 'z',
-      default: false
-    },
-    concurrency: {
-      type   : 'number',
-      alias  : 'c',
-      default: Math.min(8, cpus)
-    },
+    email      : { type : 'string', alias: 'e' },
+    password   : { type : 'string', alias: 'p' },
+    directory  : { type : 'string', alias: 'd' },
+    type       : { type : 'string', alias: 't' },
+    code       : { type   : 'boolean', alias  : 'c', default: true },
+    zip        : { type   : 'boolean', alias  : 'z', default: false },
+    concurrency: { type   : 'number', alias  : 'c', default: Math.min(8, cpus) },
 
   }
 })
@@ -150,15 +126,17 @@ async function prompt({
   try {
     //get input from ch-scrape
     let inputs = await scrape.prompt();
-    const { url, email, password, downDir, type, code, zip, concurrency, subtitle } = await prompt(inputs);
+    console.log('inputs', inputs);
+    // const { url, email, password, downDir, type, code, zip, concurrency, subtitle } = await prompt(inputs);
 
     //get courses in json from ch-scrape package
     const c = ora('get courses from ch-scrape..').succeed()
-    let json = await scrape.run({ url, email, password, downDir, type, subtitle })
+    // let json = await scrape.run({ url, email, password, downDir, type, subtitle })
+    let json = await scrape.run(inputs)
     c.succeed('get courses done')
 
     //prepare workers
-    workers = new JestWorker(require.resolve('./src/worker'), { numWorkers: concurrency });
+    workers = new JestWorker(require.resolve('./src/worker'), { numWorkers: inputs.concurrency });
     const client = new Client()
 
     //const loginMsg = ora('attempting login..').start()
@@ -169,13 +147,13 @@ async function prompt({
     //loginMsg.succeed('login success.')
 
     // for worker
-    const initMsg = ora(`preparing workers with concurrency: ${concurrency}..`).start()
+    const initMsg = ora(`preparing workers with concurrency: ${inputs.concurrency}..`).start()
 
     await Promise.all(
-      range(concurrency)
+      range(inputs.concurrency)
         .map(_ => workers.init({
           saved    : client.save(),
-          baseDir  : downDir, //path.resolve(process.cwd(), 'videos/')
+          baseDir  : inputs.downDir, //path.resolve(process.cwd(), 'videos/')
           overwrite: true
         }))
     )
@@ -188,7 +166,7 @@ async function prompt({
 
     //videos download
     const lessonMsg = ora('start videos download..').start()
-    const scheduler = new AllScheduler(workers, { concurrency, json, perPage: 1, subtitle })
+    const scheduler = new AllScheduler(workers, { ...json, perPage: 1, ...inputs })
     const interval = setInterval(async _ => {
       const stats = scheduler.stats
       lessonMsg.text = `videos downloading.. [${stats.completed}/${stats.totals}] -`// Course: ${stats?.video.join(', ')} Concurrency ${stats.page}
@@ -198,9 +176,9 @@ async function prompt({
     lessonMsg.succeed(`complete lesson download.. (${count})`)
 
     // code zip download
-    if (code || zip) {
+    if (inputs.code || inputs.zip) {
       const codeMsg = ora('start archive zip download..').start()
-      const scheduler = new ArchiveScheduler(workers, { concurrency, json, perPage: 1, subtitle, code, zip })
+      const scheduler = new ArchiveScheduler(workers, { ...json, perPage: 1, ...inputs })
 
       const interval = setInterval(_ => {
         const stats = scheduler.stats

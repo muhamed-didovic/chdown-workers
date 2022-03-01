@@ -8,17 +8,15 @@ module.exports = class AllScheduler extends Scheduler {
 
     let index = page - 1;
     let videoIndex = index*perPage
-
-
-    if (this._json.courses.length === 1 && !this._json.courses[0].chapters[videoIndex]) {
+    if (this._courses.length === 1 && !this._courses[0].chapters[videoIndex]) {
       return this._endParsing()
 
     }
-    if (this._json.courses.length > 1 && !this._json.courses[index]) {
+    if (this._courses.length > 1 && !this._courses[index]) {
       return this._endParsing()
     }
 
-    if (this._json.courses.length > 1) {
+    if (this._courses.length > 1) {
       this.downAll(index);
     } else {
       await this.downOne(videoIndex);
@@ -26,14 +24,14 @@ module.exports = class AllScheduler extends Scheduler {
   }
 
   async downOne(videoIndex) {
-    const course = this._json.courses[0]
+    const course = this._courses[0]
     const downDir = this.getLastSegment(course.url)
     let url = course.chapters[videoIndex]
     await this.sanitizeAndDownload(course, videoIndex, downDir, url);
   }
 
   async downAll(index) {
-    const course = this._json.courses[index]
+    const course = this._courses[index]
     const downDir = this.getLastSegment(course.url)
     course.chapters.forEach((lesson, index) => {
       this.sanitizeAndDownload(course, index, downDir, lesson);

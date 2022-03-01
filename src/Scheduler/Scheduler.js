@@ -3,10 +3,10 @@ const { range } = require('lodash')
 const { Deferred } = require('p-state-defer')
 
 module.exports = class Scheduler {
-  constructor(workers, { concurrency, json, perPage = 10, subtitle = false, code = false, zip = false } = {}) {
+  constructor(workers, { perPage = 10, courses, concurrency, subtitle = false, code = false, zip = false } = {}) {
     this._workers = workers
     this._concurrency = concurrency
-    this._json = json
+    this._courses = courses
 
     //flags for different options
     this._subtitle = subtitle
