@@ -3,76 +3,38 @@
 // const ora = (await import('ora')).default;
 // const { default: Worker } = require('jest-worker')
 
-const path = require('path')
 const { Worker: JestWorker } = require('jest-worker');
 const { range } = require('lodash')
-// const fs = require("fs-extra")
-const ora = require("ora");
-const prompts = require("prompts");
-const isValidPath = require("is-valid-path");
-const meow = require("meow");
 const scrape = require('ch-scrape');
-const { CookieJar } = require("tough-cookie");
-
+const prompt = require('./cli')
 const { Client, AllScheduler, ArchiveScheduler } = require('./src')
 
-const cpus = require('os').cpus().length
-const logger = ora()
+const ora = require("ora");
+const logger = ora();
 //const concurrency = Math.min(8, cpus)//8
-// console.log('concurrency', concurrency);
-
-
-/**
- * @param {Omit<import('prompts').PromptObject, 'name'>} question
- */
-async function askOrExit(question) {
-  const res = await prompts({ name: 'value', ...question }, { onCancel: () => process.exit(1) })
-  return res.value
-}
-
-const cli = meow(`
-    Usage
-      $ coursehunters <?courseUrl>
-
-    Options
-      --email, -e 
-      --password, -p
-      --directory, -d
-      --type, -t  source|course
-      --code, -c 
-      --zip, -z
-      --concurrency, -c
-      
-    Examples
-      $ coursehunters
-      $ coursehunters test.json
-      $ coursehunters -e user@gmail.com -p password -d path-to-directory -t source`, {
-  flags: {
-    email      : { type: 'string', alias: 'e' },
-    password   : { type: 'string', alias: 'p' },
-    directory  : { type: 'string', alias: 'd' },
-    type       : { type: 'string', alias: 't' },
-    code       : { type: 'boolean', alias: 'c', default: true },
-    zip        : { type: 'boolean', alias: 'z', default: false },
-    concurrency: { type: 'number', alias: 'c', default: Math.min(8, cpus) },
-
-  }
-})
 
 (async () => {
   let workers;
   try {
-    //get input from ch-scrape
+
     let inputs = await scrape.prompt();
+
+    //get local file if user want
+    let json = await prompt(inputs);
     console.log('inputs', inputs);
-    // const { url, email, password, downDir, type, code, zip, concurrency, subtitle } = await prompt(inputs);
 
-    //get courses in json from ch-scrape package
-    const c = ora('get courses from ch-scrape..').succeed()
-    // let json = await scrape.run({ url, email, password, downDir, type, subtitle })
-    let json = await scrape.run(inputs)
-    c.succeed('get courses done')
+    if (!Object.keys(json).length) {
+      //get input from ch-scrape
 
+      //get courses in json from ch-scrape package
+      const c = ora('get courses from ch-scrape..').succeed()
+      // let json = await scrape.run({ url, email, password, downDir, type, subtitle })
+      json = await scrape.run(inputs)
+      c.succeed('get courses done')
+    }
+
+    // console.log('json', json);
+    // return;
     //prepare workers
     workers = new JestWorker(require.resolve('./src/worker'), { numWorkers: inputs.concurrency });
     const client = new Client()
