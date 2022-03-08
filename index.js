@@ -46,80 +46,18 @@ const cli = meow(`
     Examples
       $ coursehunters
       $ coursehunters test.json
-      $ coursehunters -e user@gmail.com -p password -d path-to-directory -t source
-`, {
+      $ coursehunters -e user@gmail.com -p password -d path-to-directory -t source`, {
   flags: {
-    email      : { type : 'string', alias: 'e' },
-    password   : { type : 'string', alias: 'p' },
-    directory  : { type : 'string', alias: 'd' },
-    type       : { type : 'string', alias: 't' },
-    code       : { type   : 'boolean', alias  : 'c', default: true },
-    zip        : { type   : 'boolean', alias  : 'z', default: false },
-    concurrency: { type   : 'number', alias  : 'c', default: Math.min(8, cpus) },
+    email      : { type: 'string', alias: 'e' },
+    password   : { type: 'string', alias: 'p' },
+    directory  : { type: 'string', alias: 'd' },
+    type       : { type: 'string', alias: 't' },
+    code       : { type: 'boolean', alias: 'c', default: true },
+    zip        : { type: 'boolean', alias: 'z', default: false },
+    concurrency: { type: 'number', alias: 'c', default: Math.min(8, cpus) },
 
   }
 })
-
-async function prompt({
-  url = '',
-  email = '',
-  password = '',
-  downDir = '',
-  type = '',
-  code = '',
-  zip = '',
-  subtitle = ''
-}) {
-  const { flags, input } = cli
-  flags.directory = downDir;
-
-  if (input.length === 0) {
-    input.push(await askOrExit({
-      type   : 'text',
-      message: `Enter a reference file to scrape from (eg: ${path.resolve(process.cwd())}): `,
-      //initial: './frontendmasters.json'
-      initial: 'https://coursehunter.net/source/frontendmasters'
-    }))
-  }
-
-  email = flags.email || await askOrExit({
-    type    : 'text',
-    message : 'Enter email',
-    validate: value => value.length < 5 ? `Sorry, enter correct email` : true
-  })
-
-  password = flags.password || await askOrExit({
-    type    : 'text',
-    message : 'Enter password',
-    validate: value => value.length < 5 ? `Sorry, password must be longer` : true
-  })
-
-  downDir = flags.directory || path.resolve(await askOrExit({
-    type    : 'text',
-    message : `Enter a directory to save (eg: ${path.resolve(process.cwd())})`,
-    initial : path.resolve(process.cwd(), 'videos/'),
-    validate: isValidPath
-  }))
-
-  code = await askOrExit({
-    type    : 'toggle',
-    name    : 'value',
-    message : 'Download code if it exists?',
-    initial : flags.code,
-    active  : 'yes',
-    inactive: 'no'
-  })
-
-  zip = await askOrExit({
-    type    : 'toggle',
-    name    : 'value',
-    message : 'Download archive of the course if it exists?',
-    initial : flags.zip,
-    active  : 'yes',
-    inactive: 'no'
-  })
-  return { url: input[0], email, password, downDir, type, code, zip, concurrency: flags.concurrency, subtitle };
-}
 
 (async () => {
   let workers;
