@@ -123,7 +123,7 @@ module.exports = class Client {
     const videoLogger = await fs.createWriteStream(`sizes_material.txt`, { flags: 'a' })
 
     return new Promise((resolve, reject) => {
-      videoLogger.write(`Compare materials: ${this.formatBytes(parseInt(localFileSize))} - ${this.formatBytes(parseInt(remoteFileSize))}  => ${parseInt(localFileSize) === parseInt(remoteFileSize)} for file ${downPath} of ${url} \n`);
+      videoLogger.write(`${new Date().toISOString()} Compare materials: ${this.formatBytes(parseInt(localFileSize))} - ${this.formatBytes(parseInt(remoteFileSize))}  => ${parseInt(localFileSize) === parseInt(remoteFileSize)} for file ${downPath} of ${url} \n`);
       if ((parseInt(localFileSize) === parseInt(remoteFileSize))
         || (!codeFlag && url.includes('code'))
         || (!zipFlag && !url.includes('code'))
@@ -150,7 +150,7 @@ module.exports = class Client {
     const videoLogger = await fs.createWriteStream(`sizes_subtitle.txt`, { flags: 'a' })
 
     return new Promise((resolve, reject) => {
-      videoLogger.write(`Compare: ${this.formatBytes(parseInt(localFileSize))} - ${this.formatBytes(parseInt(remoteFileSize))}  => ${parseInt(localFileSize) === parseInt(remoteFileSize)} for file ${downPath} of ${signedUrl} \n`);
+      videoLogger.write(`${new Date().toISOString()} Compare: ${this.formatBytes(parseInt(localFileSize))} - ${this.formatBytes(parseInt(remoteFileSize))}  => ${parseInt(localFileSize) === parseInt(remoteFileSize)} for file ${downPath} of ${signedUrl} \n`);
       if (parseInt(localFileSize) === parseInt(remoteFileSize)) {
         resolve()
       } else {
@@ -193,7 +193,7 @@ module.exports = class Client {
 
     const videoLogger = await fs.createWriteStream(`sizes.txt`, { flags: 'a' })
     return new Promise((resolve, reject) => {
-      videoLogger.write(`Compare: ${this.formatBytes(parseInt(localFileSize))} - ${this.formatBytes(parseInt(remoteFileSize))}  => ${parseInt(localFileSize) === parseInt(remoteFileSize)} for file ${downPath} of ${url} \n`);
+      videoLogger.write(`${new Date().toISOString()} Compare: ${this.formatBytes(parseInt(localFileSize))} - ${this.formatBytes(parseInt(remoteFileSize))}  => ${parseInt(localFileSize) === parseInt(remoteFileSize)} for file ${downPath} of ${url} \n`);
       if (parseInt(localFileSize) === parseInt(remoteFileSize)) {
         resolve()
       } else {
