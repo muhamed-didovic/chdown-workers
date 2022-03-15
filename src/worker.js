@@ -24,7 +24,6 @@ class Worker {
   }
 
   async downArchive (url, downDir, codeFlag, zipFlag) {
-
     let fileName = url.split('/');
     fileName = (fileName.includes('materials') ? 'code-' : '') + fileName[fileName.length - 1];
     downDir = path.join(this._baseDir, downDir)
@@ -33,7 +32,7 @@ class Worker {
     await fs.ensureDir(downDir)
 
     try {
-      await this._client.downArchive(url, downPath, codeFlag, zipFlag)
+      await this._client.downArchive(url.replace('vsss5.', 'vss5.'), downPath, codeFlag, zipFlag)
     } catch (err) {
       throw err
     }

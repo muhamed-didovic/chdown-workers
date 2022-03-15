@@ -65,24 +65,26 @@ const logger = ora();
     }
 
     //videos download
-    const lessonMsg = ora('start videos download..').start()
-    const scheduler = new AllScheduler(workers, { ...json, perPage: 1, ...inputs })
-    const interval = setInterval(async _ => {
-      const stats = scheduler.stats
-      lessonMsg.text = `videos downloading.. [${stats.completed}/${stats.totals}] -`// Course: ${stats?.video.join(', ')} Concurrency ${stats.page}
-    }, 250)
-    const count = await scheduler.run()
-    clearInterval(interval)
-    lessonMsg.succeed(`complete lesson download.. (${count})`)
+    if (inputs.videos) {
+      const lessonMsg = ora('start videos download..').start()
+       const scheduler = new AllScheduler(workers, { ...json, perPage: 1, ...inputs })
+       const interval = setInterval(async _ => {
+         const stats = scheduler.stats
+         lessonMsg.text = `videos downloading.. [${stats.completed}/${stats.totals}] -`// Course: ${stats?.video.join(', ')} Concurrency ${stats.page}
+       }, 250)
+       const count = await scheduler.run()
+       clearInterval(interval)
+       lessonMsg.succeed(`complete lesson download.. (${count})`)
+    }
 
-    // code zip download
+    // code and archive download
     if (inputs.code || inputs.zip) {
       const codeMsg = ora('start archive zip download..').start()
       const scheduler = new ArchiveScheduler(workers, { ...json, perPage: 1, ...inputs })
 
       const interval = setInterval(_ => {
         const stats = scheduler.stats
-        codeMsg.text = `code zip downloading.. [${stats.completed}/${stats.totals}]`
+        codeMsg.text = `code and archive downloading.. [${stats.completed}/${stats.totals}]`
       }, 250)
 
       const count = await scheduler.run()

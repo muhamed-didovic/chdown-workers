@@ -17,16 +17,15 @@ module.exports = class ArchiveScheduler extends Scheduler {
     }
     if (this._courses.length > 1 && !this._courses[index]) {
       return this._endParsing()
-
     }
 
     let course = this._courses.length === 1 ? this._courses[0] : this._courses[index]
     const downDir = this.getLastSegment(course.url)
 
+    //download materials like code or zip archive of course
     if (this._courses.length === 1){
       await this._downLessonArchive(course.urlMaterials[archiveIndex], downDir)
     } else {
-      //download materials like code or zip archive of course
       course.urlMaterials.forEach((url) => this._downLessonArchive(url, downDir))
       /*if (course.urlMaterials.length) {
         course.urlMaterials.forEach((url) => this._downLessonArchive(url, downDir))
