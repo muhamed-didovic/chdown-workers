@@ -1,6 +1,6 @@
 {
   "name": "chdown-workers",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "downloader",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -42,5 +42,12 @@
     "sanitize-filename": "^1.6.3",
     "tough-cookie": "^2.5.0",
     "ytdl-run": "^0.2.1"
-  }
+  },
+  "keywords": [
+    "download",
+    "downloader",
+    "nodejs",
+    "coursehunter-downloader",
+    "coursehunter"
+  ]
 }
