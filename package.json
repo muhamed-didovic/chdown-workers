@@ -1,6 +1,6 @@
 {
   "name": "chdown-workers",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "description": "downloader",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -26,9 +26,11 @@
   "dependencies": {
     "auto-bind": "^4.0.0",
     "axios": "^0.26.0",
-    "ch-scrape": "^0.12.1",
+    "bluebird": "^3.7.2",
+    "ch-scrape": "^0.13.2",
     "cheerio": "latest",
     "fs-extra": "^10.0.1",
+    "got": "^11.0.0",
     "is-valid-path": "^0.1.1",
     "jar-got": "^0.1.0",
     "jest-worker": "^27.3.1",

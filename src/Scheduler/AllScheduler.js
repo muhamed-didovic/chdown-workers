@@ -17,7 +17,7 @@ module.exports = class AllScheduler extends Scheduler {
     }
 
     if (this._courses.length > 1) {
-      this.downAll(index);
+      await this.downAll(index);
     } else {
       await this.downOne(videoIndex);
     }
@@ -33,7 +33,7 @@ module.exports = class AllScheduler extends Scheduler {
   async downAll(index) {
     const course = this._courses[index]
     const downDir = this.getLastSegment(course.url)
-    course.chapters.forEach((lesson, index) => {
+    course?.chapters?.forEach((lesson, index) => {
       this.sanitizeAndDownload(course, index, downDir, lesson);
     })
   }

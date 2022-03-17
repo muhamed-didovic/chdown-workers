@@ -1,5 +1,6 @@
 const { CookieJar } = require('tough-cookie')
 const jarGot = require('jar-got')
+const got = require('got')
 const fs = require('fs')
 
 // const ora = require('ora')
@@ -8,9 +9,10 @@ const fs = require('fs')
 // const topics = require('../topics')
 // const courses = require('../a.json')
 const cheerio = require('cheerio')
-// const axios = require("axios");
-// const path = require("path");
-// const { fetcher, createFetcher } = require('scraping-ninja-toolkit');;
+// const fileSize = require("./helpers/fileSize")
+const Bluebird = require('bluebird');
+Bluebird.config({ longStackTraces: true });
+global.Promise = Bluebird;
 
 module.exports = class Client {
   static restore(saved) {
@@ -47,13 +49,13 @@ module.exports = class Client {
 
     const put = await this._got('https://coursehunter.net/api/auth/login', {
       'method': 'PUT',
-      headers: {
+      headers : {
         // "Cookie": "user_ident=4921da7b-0a69-4195-a1a5-0fca92fabbb6; CHUNTERS=bmfj3ul4051ba6rso310hiapak; accessToken=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiIsImp0aSI6IjRmMWcyM2ExMmFhIn0.eyJpc3MiOiJodHRwczpcL1wvY291cnNlaHVudGVyLm5ldCIsImF1ZCI6Imh0dHBzOlwvXC9jb3Vyc2VodW50ZXIubmV0IiwianRpIjoiNGYxZzIzYTEyYWEiLCJpYXQiOjE2MzY2NDQ5ODcsIm5iZiI6MTYzNjY0NTA0NywiZXhwIjoxNjM3MjQ5Nzg3LCJ1c2VyX2lkIjoiMjIwODMiLCJlX21haWwiOiJhYmhhZ3NhaW5AZ21haWwuY29tIn0.P-RJYUa2s2-lN9uuKxhWOUVQUgK8NUBcJ3d7vEnML_M; ch_quiz=a1d2bae713d864293b9220dc291dc3fe",
         // 'Accept': 'application/json',
         'Content-Type': 'application/json',
         // 'Access-Control-Allow-Origin': '*'
       },
-      body   : JSON.stringify({ 'e_mail': email, 'password': pwd })
+      body    : JSON.stringify({ 'e_mail': email, 'password': pwd })
     })
     // if login succeeds, it redirects.
     return put.statusCode === 302
@@ -116,26 +118,89 @@ module.exports = class Client {
   }
 
   async downArchive(url, downPath, codeFlag, zipFlag) {
-    const response = await this._got.head(url)
-    let localFileSize = this.getFilesizeInBytes(downPath);
-    let remoteFileSize = response?.headers['content-length'] ?? 0
+    let remoteFileSize = 0;
+    const errorsLogger = await fs.createWriteStream(`material_errors.txt`, { flags: 'a' })
+    try {
+      const response = await this._got.head(url)
+      remoteFileSize = response?.headers['content-length'] ?? 0
+    } catch (err) {
+      errorsLogger.write(`${new Date().toISOString()} url: ${url} \n`);
+      return Promise.resolve();
+    }
 
+    let localFileSize = this.getFilesizeInBytes(downPath);
     const videoLogger = await fs.createWriteStream(`sizes_material.txt`, { flags: 'a' })
 
-    return new Promise((resolve, reject) => {
-      videoLogger.write(`${new Date().toISOString()} Compare materials: ${this.formatBytes(parseInt(localFileSize))} - ${this.formatBytes(parseInt(remoteFileSize))}  => ${parseInt(localFileSize) === parseInt(remoteFileSize)} for file ${downPath} of ${url} \n`);
+    return await new Promise((resolve, reject) => {
+      // videoLogger.write(`${new Date().toISOString()} Compare materials: ${this.formatBytes(parseInt(localFileSize))} - ${this.formatBytes(parseInt(remoteFileSize))}  => ${parseInt(localFileSize) === parseInt(remoteFileSize)} for file ${downPath} of ${url} \n`);
+      if ((parseInt(localFileSize) !== parseInt(remoteFileSize))) {
+        videoLogger.write(`${new Date().toISOString()} Compare materials: ${this.formatBytes(parseInt(localFileSize))} - ${this.formatBytes(parseInt(remoteFileSize))}  => ${parseInt(localFileSize) === parseInt(remoteFileSize)} for file ${downPath.split('/').pop()} of ${url} \n`);
+      }
       if ((parseInt(localFileSize) === parseInt(remoteFileSize))
         || (!codeFlag && url.includes('code'))
-        || (!zipFlag && !url.includes('code'))
-      ) {
+        || (!zipFlag && !url.includes('code'))) {
         resolve()
+        // return Promise.resolve();
       } else {
+
+        /*let writeStream;
+
+        const fn = async retryStream => {
+
+          const stream = await retryStream ?? await this._got.stream(url);
+          errorsLogger.write(`ttttt${new Date().toISOString()} url: ${url} \n`);
+          if (writeStream) {
+            writeStream.destroy();
+          }
+
+          // If you don't attach the listener, it will NOT make a retry.
+          // It automatically checks the listener count so it knows whether to retry or not :)
+          stream.once('retry', (retryCount, error, createRetryStream) => {
+            errorsLogger.write(`retry: ${new Date().toISOString()} url: ${url} \n`);
+            fn(createRetryStream()); // or: fn(createRetryStream(optionsToMerge))
+          });
+
+          stream.on('error', (err) => {
+            errorsLogger.write(`${new Date().toISOString()} Error with url: ${url} \n`);
+            // errorsLogger.write(err);
+            //reject(err)
+            return Promise.reject(err);
+          })
+
+          stream.on('finish', () => Promise.resolve())
+
+          writeStream = fs.createWriteStream(downPath);
+
+          stream.pipe(writeStream);
+        };
+
+        return await fn();*/
+
         this._got
-          .stream(url)
-          .on('error', reject)
+          .stream(url, {
+            retry: {
+              limit: 50
+            }
+          })
+          .on('error', (err) => {
+            errorsLogger.write(`${new Date().toISOString()} Error with url: ${url} \n`);
+            // errorsLogger.write(err);
+            return reject(err)
+          })
+          .once('retry', (retryCount, error, createRetryStream) => {
+            errorsLogger.write(`${new Date().toISOString()} Error with url: ${url} retyting ${retryCount} \n`);
+          })
           .pipe(fs.createWriteStream(downPath))
-          .on('error', reject)
-          .on('finish', resolve)
+          /*.on('error', (err) => {
+              console.log('2tu smo', err);
+              errorsLogger.write('2IMAMO ERROR');
+              errorsLogger.write(err);
+              reject(err)
+          })*/
+          .on('finish', () => {
+            videoLogger.write(`${new Date().toISOString()} Done for file ${downPath.split('/').pop()} of ${url} \n`);
+            return resolve()
+          })
 
       }
     })
@@ -186,10 +251,17 @@ module.exports = class Client {
   }
 
   async downVideoBySigned(url, downPath) {
-    const response = await this._got.head(url)
+    let remoteFileSize = 0;
+    const errorsLogger = await fs.createWriteStream(`videos_errors.txt`, { flags: 'a' })
+    try {
+      const response = await this._got.head(url)
+      remoteFileSize = response?.headers['content-length'] ?? 0
+    } catch (err) {
+      errorsLogger.write(`${new Date().toISOString()} url: ${url} \n`);
+      return Promise.resolve();
+    }
 
     let localFileSize = this.getFilesizeInBytes(downPath);
-    let remoteFileSize = response?.headers['content-length'] ?? 0
 
     const videoLogger = await fs.createWriteStream(`sizes.txt`, { flags: 'a' })
     return new Promise((resolve, reject) => {
