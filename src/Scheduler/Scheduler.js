@@ -3,93 +3,99 @@ const { range } = require('lodash')
 const { Deferred } = require('p-state-defer')
 
 module.exports = class Scheduler {
-  constructor(workers, { perPage = 10, courses, concurrency, subtitle = false, code = false, zip = false } = {}) {
-    this._workers = workers
-    this._concurrency = concurrency
-    this._courses = courses
+    constructor(workers, { perPage = 10, courses, concurrency, subtitle = false, code = false, zip = false } = {}) {
+        this._workers = workers
+        this._concurrency = concurrency
+        this._courses = courses
 
-    //flags for different options
-    this._subtitle = subtitle
-    this._code = code
-    this._zip = zip
+        //flags for different options
+        this._subtitle = subtitle
+        this._code = code
+        this._zip = zip
 
-    // for parsing
-    this._perPage = perPage
-    this._page = 0
-    this._parsedPages = 0
-    this._endPage = false
+        // for parsing
+        this._perPage = perPage
+        this._page = 0
+        this._parsedPages = 0
+        this._endPage = false
 
-    // for stats
-    this._completed = 0
-    this._totals = 0
-    this._deffer = new Deferred()
-  }
-
-  get stats() {
-    return {
-      completed: this._completed,
-      totals   : this._totals,
-      page     : this._page
+        // for stats
+        this._completed = 0
+        this._totals = 0
+        this._deffer = new Deferred()
     }
-  }
 
-  /*async run () {
-    for (const _ of range(this._concurrency)) {
-      await this._next();
+    get stats() {
+        return {
+            completed: this._completed,
+            totals   : this._totals,
+            page     : this._page
+        }
     }
-    return this._deffer.promise
-  }*/
-  run() {
-    range(this._concurrency).forEach(_ => this._next())
-    return this._deffer.promise
-  }
 
-  async _next() {
-    try {
-      await this._parseNext(++this._page, this._perPage)
-      this._parsedPages++
-      this._endPage ? this.resolveIfDone() : this._next()
-    } catch (err) {
-      this._deffer.reject(err)
+    /*async run () {
+      for (const _ of range(this._concurrency)) {
+        await this._next();
+      }
+      return this._deffer.promise
+    }*/
+    run() {
+        range(this._concurrency).forEach(_ => this._next())
+        return this._deffer.promise
     }
-  }
 
-  resolveIfDone() {
-    if (this._endPage
-      && this._page === this._parsedPages
-      && this._totals === this._completed) {
-      this._deffer.resolve(this._completed)
+    async _next() {
+        try {
+            await this._parseNext(++this._page, this._perPage)
+            this._parsedPages++
+            // console.log('---this._parsedPage', this._parsedPages);
+            this._endPage ? this.resolveIfDone() : this._next()
+        } catch (err) {
+            this._deffer.reject(err)
+        }
     }
-  }
 
-  _parseNext() {
-    throw new Error('needs implement!')
-  }
+    resolveIfDone() {
+        /*console.log('this._endPage', this._endPage);
+        console.log('this._page', this._page);
+        console.log('this._parsedPages', this._parsedPages);
+        console.log('this._totals', this._totals);
+        console.log('this._completed', this._completed);*/
+        if (this._endPage
+            && this._page === this._parsedPages
+            && this._totals === this._completed) {
+            this._deffer.resolve(this._completed)
+        }
+    }
 
-  _endParsing() {
-    if (!this._endPage) this._endPage = true
-  }
+    _parseNext() {
+        throw new Error('needs implement!')
+    }
 
-  async _downLessonVideo(url, downDir, fileName) {//{ signedUrl, mpdUrl }
-    this._totals++
-    await this._workers.downLessonVideo(url, downDir, fileName)//{ signedUrl, mpdUrl }
-    this._completed++
-    this.resolveIfDone()
-  }
+    _endParsing() {
+        if (!this._endPage) this._endPage = true
+    }
 
-  async _downLessonSubtitle(subtitle, downDir, subtitleName) {
-    await this._workers.downSubtitleFile(subtitle, downDir, subtitleName)
-  }
+    async _downLessonVideo(url, downDir, fileName) {//{ signedUrl, mpdUrl }
+        this._totals++
+        await this._workers.downLessonVideo(url, downDir, fileName)//{ signedUrl, mpdUrl }
+        this._completed++
+        this.resolveIfDone()
+    }
 
-  async _downLessonArchive(url, downDir) {
-    this._totals++
-    await this._workers.downArchive(url, downDir, this._code, this._zip)
-    this._completed++
-    this.resolveIfDone()
-  }
+    async _downLessonSubtitle(subtitle, downDir, subtitleName) {
+        await this._workers.downSubtitleFile(subtitle, downDir, subtitleName)
+    }
 
-  getLastSegment(url) {
-    let parts = url.split('/');
-    return parts.pop() || parts.pop(); // handle potential trailing slash
-  }
+    async _downLessonArchive(url, downDir) {
+        this._totals++
+        await this._workers.downArchive(url, downDir, this._code, this._zip)
+        this._completed++
+        this.resolveIfDone()
+    }
+
+    getLastSegment(url) {
+        let parts = url.split('/');
+        return parts.pop() || parts.pop(); // handle potential trailing slash
+    }
 }
