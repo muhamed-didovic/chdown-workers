@@ -2,15 +2,13 @@ const { CookieJar } = require('tough-cookie')
 const jarGot = require('jar-got')
 const got = require('got')
 const fs = require('fs')
+const path = require("path");
 
-// const ora = require('ora')
-// const Axios = require("axios");
-// const FileDownload = require("js-file-download");
-// const topics = require('../topics')
-// const courses = require('../a.json')
+const downOverYoutubeDL = require("./helpers/downOverYoutubeDL")
 const cheerio = require('cheerio')
-// const fileSize = require("./helpers/fileSize")
+const fileSize = require('promisify-remote-file-size')
 const Bluebird = require('bluebird');
+const Promise = require("bluebird");
 Bluebird.config({ longStackTraces: true });
 global.Promise = Bluebird;
 
@@ -117,92 +115,62 @@ module.exports = class Client {
     }]
   }
 
-  async downArchive(url, downPath, codeFlag, zipFlag) {
-    let remoteFileSize = 0;
+  async downArchive(url, downDir, fileName, codeFlag, zipFlag) {
+    const downPath = path.join(downDir, fileName);
     const errorsLogger = await fs.createWriteStream(`material_errors.txt`, { flags: 'a' })
+    let remoteFileSize = 0;
     try {
-      const response = await this._got.head(url)
-      remoteFileSize = response?.headers['content-length'] ?? 0
+      remoteFileSize = await fileSize(url); //await fileSize(encodeURI(url));
     } catch (err) {
-      errorsLogger.write(`${new Date().toISOString()} url: ${url} \n`);
-      return Promise.resolve();
+      if (err.message === 'Received invalid status code: 404') {
+        errorsLogger.write(`${new Date().toISOString()} ERROR WITH THE URL ${url}, Error message: ${err.message} \n`);
+        return Promise.resolve();
+      }
     }
-
     let localFileSize = this.getFilesizeInBytes(downPath);
     const videoLogger = await fs.createWriteStream(`sizes_material.txt`, { flags: 'a' })
 
     return await new Promise((resolve, reject) => {
-      // videoLogger.write(`${new Date().toISOString()} Compare materials: ${this.formatBytes(parseInt(localFileSize))} - ${this.formatBytes(parseInt(remoteFileSize))}  => ${parseInt(localFileSize) === parseInt(remoteFileSize)} for file ${downPath} of ${url} \n`);
-      if ((parseInt(localFileSize) !== parseInt(remoteFileSize))) {
+    videoLogger.write(`${new Date().toISOString()} Compare materials: ${this.formatBytes(parseInt(localFileSize))} - ${this.formatBytes(parseInt(remoteFileSize))}  => ${parseInt(localFileSize) === parseInt(remoteFileSize)} for file ${downPath} of ${url} \n`);
+    if ((parseInt(localFileSize) !== parseInt(remoteFileSize))) {
         videoLogger.write(`${new Date().toISOString()} Compare materials: ${this.formatBytes(parseInt(localFileSize))} - ${this.formatBytes(parseInt(remoteFileSize))}  => ${parseInt(localFileSize) === parseInt(remoteFileSize)} for file ${downPath.split('/').pop()} of ${url} \n`);
-      }
-      if ((parseInt(localFileSize) === parseInt(remoteFileSize))
-        || (!codeFlag && url.includes('code'))
-        || (!zipFlag && !url.includes('code'))) {
-        resolve()
-        // return Promise.resolve();
-      } else {
+    }
+    if ((parseInt(localFileSize) === parseInt(remoteFileSize))
+      || (!codeFlag && url.includes('code'))
+      || (!zipFlag && !url.includes('code'))) {
+      resolve()
+      //return Promise.resolve();
+    } else {
 
-        /*let writeStream;
+      //await downOverYoutubeDL(url, downPath, downDir)
 
-        const fn = async retryStream => {
-
-          const stream = await retryStream ?? await this._got.stream(url);
-          errorsLogger.write(`ttttt${new Date().toISOString()} url: ${url} \n`);
-          if (writeStream) {
-            writeStream.destroy();
+      this._got
+        .stream(url, {
+          retry: {
+            limit: 50
           }
+        })
+        .on('error', (err) => {
+          errorsLogger.write(`${new Date().toISOString()} Error with url: ${url} \n`);
+          // errorsLogger.write(err);
+          return reject(err)
+        })
+        .once('retry', (retryCount, error, createRetryStream) => {
+          errorsLogger.write(`${new Date().toISOString()} Error with url: ${url} retyting ${retryCount} \n`);
+        })
+        .pipe(fs.createWriteStream(downPath))
+        /*.on('error', (err) => {
+            console.log('2tu smo', err);
+            errorsLogger.write('2IMAMO ERROR');
+            errorsLogger.write(err);
+            reject(err)
+        })*/
+        .on('finish', () => {
+          videoLogger.write(`${new Date().toISOString()} Done for file ${downPath.split('/').pop()} of ${url} Compare:${this.formatBytes(parseInt(localFileSize))} - ${this.formatBytes(parseInt(remoteFileSize))} \n`);
+          return resolve()
+        })
 
-          // If you don't attach the listener, it will NOT make a retry.
-          // It automatically checks the listener count so it knows whether to retry or not :)
-          stream.once('retry', (retryCount, error, createRetryStream) => {
-            errorsLogger.write(`retry: ${new Date().toISOString()} url: ${url} \n`);
-            fn(createRetryStream()); // or: fn(createRetryStream(optionsToMerge))
-          });
-
-          stream.on('error', (err) => {
-            errorsLogger.write(`${new Date().toISOString()} Error with url: ${url} \n`);
-            // errorsLogger.write(err);
-            //reject(err)
-            return Promise.reject(err);
-          })
-
-          stream.on('finish', () => Promise.resolve())
-
-          writeStream = fs.createWriteStream(downPath);
-
-          stream.pipe(writeStream);
-        };
-
-        return await fn();*/
-
-        this._got
-          .stream(url, {
-            retry: {
-              limit: 50
-            }
-          })
-          .on('error', (err) => {
-            errorsLogger.write(`${new Date().toISOString()} Error with url: ${url} \n`);
-            // errorsLogger.write(err);
-            return reject(err)
-          })
-          .once('retry', (retryCount, error, createRetryStream) => {
-            errorsLogger.write(`${new Date().toISOString()} Error with url: ${url} retyting ${retryCount} \n`);
-          })
-          .pipe(fs.createWriteStream(downPath))
-          /*.on('error', (err) => {
-              console.log('2tu smo', err);
-              errorsLogger.write('2IMAMO ERROR');
-              errorsLogger.write(err);
-              reject(err)
-          })*/
-          .on('finish', () => {
-            videoLogger.write(`${new Date().toISOString()} Done for file ${downPath.split('/').pop()} of ${url} \n`);
-            return resolve()
-          })
-
-      }
+    }
     })
   }
 
@@ -250,15 +218,24 @@ module.exports = class Client {
     })
   }
 
-  async downVideoBySigned(url, downPath) {
+  async downVideoBySigned(url, downDir, fileName) {
+    const downPath = path.join(downDir, fileName)
     let remoteFileSize = 0;
     const errorsLogger = await fs.createWriteStream(`videos_errors.txt`, { flags: 'a' })
-    try {
+   /* try {
       const response = await this._got.head(url)
       remoteFileSize = response?.headers['content-length'] ?? 0
     } catch (err) {
       errorsLogger.write(`${new Date().toISOString()} url: ${url} \n`);
-      return Promise.resolve();
+      // return Promise.resolve();
+    }*/
+    try {
+      remoteFileSize = await fileSize(url); //await fileSize(encodeURI(url));
+    } catch (err) {
+      if (err.message === 'Received invalid status code: 404') {
+        errorsLogger.write(`${new Date().toISOString()} ERROR WITH THE URL ${url}, Error message: ${err.message} \n`);
+        return Promise.resolve();
+      }
     }
 
     let localFileSize = this.getFilesizeInBytes(downPath);
@@ -268,7 +245,10 @@ module.exports = class Client {
       videoLogger.write(`${new Date().toISOString()} Compare: ${this.formatBytes(parseInt(localFileSize))} - ${this.formatBytes(parseInt(remoteFileSize))}  => ${parseInt(localFileSize) === parseInt(remoteFileSize)} for file ${downPath} of ${url} \n`);
       if (parseInt(localFileSize) === parseInt(remoteFileSize)) {
         resolve()
+        //return Promise.resolve();
       } else {
+        // const downPath = path.join(downDir, fileName)
+        // await downOverYoutubeDL(url, downPath, downDir)
         this._got
           .stream(url)
           .on('error', err => {

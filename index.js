@@ -67,14 +67,14 @@ const logger = ora();
     //videos download
     if (inputs.videos) {
       const lessonMsg = ora('start videos download..').start()
-       const scheduler = new AllScheduler(workers, { ...json, perPage: 1, ...inputs })
-       const interval = setInterval(async _ => {
-         const stats = scheduler.stats
-         lessonMsg.text = `videos downloading.. [${stats.completed}/${stats.totals}] -`// Course: ${stats?.video.join(', ')} Concurrency ${stats.page}
-       }, 250)
-       const count = await scheduler.run()
-       clearInterval(interval)
-       lessonMsg.succeed(`complete lesson download.. (${count})`)
+      const scheduler = new AllScheduler(workers, { ...json, perPage: 1, ...inputs })
+      const interval = setInterval(async _ => {
+        const stats = scheduler.stats
+        lessonMsg.text = `videos downloading.. [${stats.completed}/${stats.totals}] -`// Course: ${stats?.video.join(', ')} Concurrency ${stats.page}
+      }, 250)
+      const count = await scheduler.run()
+      clearInterval(interval)
+      lessonMsg.succeed(`complete lesson download.. (${count})`)
     }
 
     // code and archive download

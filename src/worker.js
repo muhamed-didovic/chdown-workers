@@ -5,7 +5,7 @@ const path = require("path");
 const ytdl = require('ytdl-run')
 
 class Worker {
-  constructor () {
+  constructor() {
     this._client = null
     this._overwrite = true
     this._baseDir = null
@@ -13,32 +13,32 @@ class Worker {
     autobind(this)
   }
 
-  init ({ saved, overwrite, baseDir }) {
+  init({ saved, overwrite, baseDir }) {
     this._client = Client.restore(saved)
     this._overwrite = overwrite
     this._baseDir = baseDir
   }
 
-  getLessons (page, perpage, json) {
+  getLessons(page, perpage, json) {
     return this._client.getLessons(page, perpage, json)
   }
 
-  async downArchive (url, downDir, codeFlag, zipFlag) {
+  async downArchive(url, downDir, codeFlag, zipFlag) {
     let fileName = url.split('/');
     fileName = (fileName.includes('materials') ? 'code-' : '') + fileName[fileName.length - 1];
     downDir = path.join(this._baseDir, downDir)
 
-    const downPath = path.join(downDir, fileName)
+    // const downPath = path.join(downDir, fileName)
     await fs.ensureDir(downDir)
 
     try {
-      await this._client.downArchive(url.replace('vsss5.', 'vss5.'), downPath, codeFlag, zipFlag)
+      await this._client.downArchive(url.replace('//vsss', '//vss'), downDir, fileName, codeFlag, zipFlag)
     } catch (err) {
       throw err
     }
   }
 
-  async downSubtitleFile (url, downDir, fileName) {
+  async downSubtitleFile(url, downDir, fileName) {
     downDir = path.join(this._baseDir, downDir)
     const downPath = path.join(downDir, fileName)
     await fs.ensureDir(downDir)
@@ -50,7 +50,7 @@ class Worker {
     }
   }
 
-  async downLessonVideo (url, downDir, fileName) {//{ signedUrl, mpdUrl }
+  async downLessonVideo(url, downDir, fileName) {//{ signedUrl, mpdUrl }
     // const pathLogger = await fs.createWriteStream(`path.txt`, { flags: 'a' })
     // pathLogger.write(`Path for fileName: ${fileName}, downDir: ${downDir}, _baseDir: ${this._baseDir}\n`)
 
@@ -73,8 +73,8 @@ class Worker {
       // if (!signedUrl) throw new Error('to be processed by youtube-dl..')
       if (!url) throw new Error('No url provided..')
       // videoLogger.write(`1Prosli smo exception\n`);
-      await this._client.downVideoBySigned(url, downPath)
-      // videoLogger.write(`2Prosli smo exception: ${fileName}\n`);
+      await this._client.downVideoBySigned(url, downDir, fileName)
+
       // logger.write(`Downloaded normally, file: ${fileName}\n`)
     } catch (err) {
       //await fs.remove(downPath) // not supports overwrite..
