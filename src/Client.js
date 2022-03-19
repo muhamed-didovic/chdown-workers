@@ -117,7 +117,7 @@ module.exports = class Client {
 
     async downArchive(url, downDir, fileName, codeFlag, zipFlag) {
         const downPath = path.join(downDir, fileName);
-        const errorsLogger = await fs.createWriteStream(`material_errors.txt`, { flags: 'a' })
+        /*const errorsLogger = await fs.createWriteStream(`material_errors.txt`, { flags: 'a' })
         let remoteFileSize = 0;
         try {
             remoteFileSize = await fileSize(url); //await fileSize(encodeURI(url));
@@ -128,23 +128,21 @@ module.exports = class Client {
             }
         }
         let localFileSize = this.getFilesizeInBytes(downPath);
-        const videoLogger = await fs.createWriteStream(`sizes_material.txt`, { flags: 'a' })
+        const videoLogger = await fs.createWriteStream(`sizes_material.txt`, { flags: 'a' })*/
 
-        return await new Promise((resolve, reject) => {
-            videoLogger.write(`${new Date().toISOString()} Compare materials: ${this.formatBytes(parseInt(localFileSize))} - ${this.formatBytes(parseInt(remoteFileSize))}  => ${parseInt(localFileSize) === parseInt(remoteFileSize)} for file ${downPath} of ${url} \n`);
+        // return await new Promise((resolve, reject) => {
+            /*videoLogger.write(`${new Date().toISOString()} Compare materials: ${this.formatBytes(parseInt(localFileSize))} - ${this.formatBytes(parseInt(remoteFileSize))}  => ${parseInt(localFileSize) === parseInt(remoteFileSize)} for file ${downPath} of ${url} \n`);
             if ((parseInt(localFileSize) !== parseInt(remoteFileSize))) {
                 videoLogger.write(`${new Date().toISOString()} Compare materials: ${this.formatBytes(parseInt(localFileSize))} - ${this.formatBytes(parseInt(remoteFileSize))}  => ${parseInt(localFileSize) === parseInt(remoteFileSize)} for file ${downPath.split('/').pop()} of ${url} \n`);
-            }
-            if ((parseInt(localFileSize) === parseInt(remoteFileSize))
-                || (!codeFlag && url.includes('code'))
-                || (!zipFlag && !url.includes('code'))) {
-                resolve()
-                //return Promise.resolve();
+            }*/
+            if ((!codeFlag && url.includes('code')) || (!zipFlag && !url.includes('code'))) {//(parseInt(localFileSize) === parseInt(remoteFileSize)) ||
+                //resolve()
+                return Promise.resolve();
             } else {
 
-                //await downOverYoutubeDL(url, downPath, downDir)
+                return await downOverYoutubeDL(url, downPath, downDir)
 
-                this._got
+                /*this._got
                     .stream(url, {
                         retry: {
                             limit: 50
@@ -159,19 +157,19 @@ module.exports = class Client {
                         errorsLogger.write(`${new Date().toISOString()} Error with url: ${url} retyting ${retryCount} \n`);
                     })
                     .pipe(fs.createWriteStream(downPath))
-                    /*.on('error', (err) => {
+                    /!*.on('error', (err) => {
                         console.log('2tu smo', err);
                         errorsLogger.write('2IMAMO ERROR');
                         errorsLogger.write(err);
                         reject(err)
-                    })*/
+                    })*!/
                     .on('finish', () => {
                         videoLogger.write(`${new Date().toISOString()} Done for file ${downPath.split('/').pop()} of ${url} Compare:${this.formatBytes(parseInt(localFileSize))} - ${this.formatBytes(parseInt(remoteFileSize))} \n`);
                         return resolve()
-                    })
+                    })*/
 
             }
-        })
+        //})
     }
 
     async downSubtitle(signedUrl, downPath) {
@@ -220,15 +218,8 @@ module.exports = class Client {
 
     async downVideoBySigned(url, downDir, fileName) {
         const downPath = path.join(downDir, fileName)
-        let remoteFileSize = 0;
+        /*let remoteFileSize = 0;
         const errorsLogger = await fs.createWriteStream(`videos_errors.txt`, { flags: 'a' })
-        /* try {
-           const response = await this._got.head(url)
-           remoteFileSize = response?.headers['content-length'] ?? 0
-         } catch (err) {
-           errorsLogger.write(`${new Date().toISOString()} url: ${url} \n`);
-           // return Promise.resolve();
-         }*/
         try {
             remoteFileSize = await fileSize(url); //await fileSize(encodeURI(url));
         } catch (err) {
@@ -236,36 +227,36 @@ module.exports = class Client {
                 errorsLogger.write(`${new Date().toISOString()} ERROR WITH THE URL ${url}, Error message: ${err.message} \n`);
                 return Promise.resolve();
             }
-        }
+        }*/
 
-        let localFileSize = this.getFilesizeInBytes(downPath);
+        // let localFileSize = this.getFilesizeInBytes(downPath);
 
-        const videoLogger = await fs.createWriteStream(`sizes.txt`, { flags: 'a' })
-        return new Promise((resolve, reject) => {
-            videoLogger.write(`${new Date().toISOString()} Compare: ${this.formatBytes(parseInt(localFileSize))} - ${this.formatBytes(parseInt(remoteFileSize))}  => ${parseInt(localFileSize) === parseInt(remoteFileSize)} for file ${downPath} of ${url} \n`);
-            if (parseInt(localFileSize) === parseInt(remoteFileSize)) {
-                resolve()
-                //return Promise.resolve();
-            } else {
-                // const downPath = path.join(downDir, fileName)
-                // await downOverYoutubeDL(url, downPath, downDir)
-                this._got
+        // const videoLogger = await fs.createWriteStream(`sizes.txt`, { flags: 'a' })
+        // return new Promise((resolve, reject) => {
+        //     videoLogger.write(`${new Date().toISOString()} Compare: ${this.formatBytes(parseInt(localFileSize))} - ${this.formatBytes(parseInt(remoteFileSize))}  => ${parseInt(localFileSize) === parseInt(remoteFileSize)} for file ${downPath} of ${url} \n`);
+            /*if (parseInt(localFileSize) === parseInt(remoteFileSize)) {
+                //resolve()
+                return Promise.resolve();
+            } else {*/
+
+                return await downOverYoutubeDL(url, downPath, downDir)
+                /*this._got
                     .stream(url)
                     .on('error', err => {
                         reject(err)
                     })
                     .pipe(fs.createWriteStream(downPath))
-                    /*.on('downloadProgress', progress => {
+                    /!*.on('downloadProgress', progress => {
                       videoLogger.write(`111transfered: ${progress.transferred} = total: ${progress.total} \n`);
                     })
                     .on('progress', progress => {
                       videoLogger.write(`22transfered: ${progress.transferred} = total: ${progress.total} \n`);
-                    })*/
+                    })*!/
                     .on('error', reject)
-                    .on('finish', resolve)
+                    .on('finish', resolve)*/
 
-            }
-        })
+            //}
+        // })
     }
 }
 

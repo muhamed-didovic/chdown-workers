@@ -48,7 +48,6 @@ module.exports = class Scheduler {
         try {
             await this._parseNext(++this._page, this._perPage)
             this._parsedPages++
-            // console.log('---this._parsedPage', this._parsedPages);
             this._endPage ? this.resolveIfDone() : this._next()
         } catch (err) {
             this._deffer.reject(err)
@@ -56,11 +55,6 @@ module.exports = class Scheduler {
     }
 
     resolveIfDone() {
-        /*console.log('this._endPage', this._endPage);
-        console.log('this._page', this._page);
-        console.log('this._parsedPages', this._parsedPages);
-        console.log('this._totals', this._totals);
-        console.log('this._completed', this._completed);*/
         if (this._endPage
             && this._page === this._parsedPages
             && this._totals === this._completed) {

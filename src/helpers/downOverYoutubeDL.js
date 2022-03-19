@@ -24,31 +24,28 @@ const download = (url, dest, {
     errorsLogger
 }) => new Promise((resolve, reject) => {
     const videoLogger = createLogger(downFolder);
-    // await fs.remove(dest) // not supports overwrite..
+    fs.removeSync(dest) // not supports overwrite..
 
     // console.log(`to be processed by youtube-dl... ${dest.split('/').pop()} Found:${localSizeInBytes}/${remoteSizeInBytes}`)
     const youtubeDlWrap = new youtubedl()
     let youtubeDlEventEmitter = youtubeDlWrap
         .exec([url, "-o", path.toNamespacedPath(dest)])
         /*.on("progress", (progress) => {
-            ms.update(dest, { text: `${index}. Downloading: ${progress.percent}% of ${progress.totalSize} at ${progress.currentSpeed} in ${progress.eta} | ${dest.split('/').pop()} Found:${localSizeInBytes}/${remoteSizeInBytes}` })
+            ms.update(dest, { text: `Downloading: ${progress.percent}% of ${progress.totalSize} at ${progress.currentSpeed} in ${progress.eta} | ${dest.split('/').pop()} Found:${localSizeInBytes}/${remoteSizeInBytes}` })
         })*/
         // .on("youtubeDlEvent", (eventType, eventData) => console.log(eventType, eventData))
         .on("error", (error) => {
             errorsLogger.write(`${new Date().toISOString()} Error with url: ${url} ERROR: ${error.message}\n`);
-            //ms.remove(dest);
-            /*fs.unlink(dest, (err) => {
-                reject(error);
+           /* fs.unlink(dest, (err) => {
+                return reject(error);
             });*/
-            reject(error);
+            return reject(error);
 
         })
         .on("close", () => {
-            // ms.succeed(dest, { text: `${index}. End download ytdl: ${dest} Found:${localSizeInBytes}/${remoteSizeInBytes} - Size:${formatBytes(getFilesizeInBytes(dest))}` })//.split('/').pop()
-            //ms.remove(dest);
-            logger.write(`${index}. End download ytdl: ${dest} compare L/R:${localSizeInBytes}/${remoteSizeInBytes} - Local in bytes:${formatBytes(getFilesizeInBytes(dest))}`.blue);
+            logger.write(`End download ytdl: ${dest} compare L/R:${localSizeInBytes}/${remoteSizeInBytes} - Local in bytes:${formatBytes(getFilesizeInBytes(dest))} \n`);
             videoLogger.write(`${dest} Size:${getFilesizeInBytes(dest)}\n`);
-            resolve()
+            return resolve();
         })
 
 });
@@ -92,8 +89,6 @@ const downloadVideo = async (url, dest, {
  * @param url
  * @param {import("fs").PathLike} dest
  * @param downFolder
- * @param index
- * @param ms
  */
 module.exports = async (url, dest, downFolder) => {
     url = encodeURI(url)
@@ -117,17 +112,17 @@ module.exports = async (url, dest, downFolder) => {
     // fs.writeFileSync(`${dest}.json`, JSON.stringify(info, null, 2), 'utf8');
     // console.log(`locale/remote comparison:`, localSize , remoteFileSize,  isDownloaded);
     if (remoteFileSize === localSize || isDownloaded) {
-        //ms.succeed(dest, { text: `${index}. Video already downloaded: ${dest.split('/').pop()} - ${localSizeInBytes}/${formatBytes(remoteFileSize)}` });
-        // console.log(`${index}. Video already downloaded: ${dest.split('/').pop()} - ${localSizeInBytes}/${formatBytes(remoteFileSize)}`);
+        //ms.succeed(dest, { text: `Video already downloaded: ${dest.split('/').pop()} - ${localSizeInBytes}/${formatBytes(remoteFileSize)}` });
+        // console.log(`Video already downloaded: ${dest.split('/').pop()} - ${localSizeInBytes}/${formatBytes(remoteFileSize)}`);
         // ms.remove(dest);
-        // console.log(`${index}. Video already downloaded: ${dest.split('/').pop()} - ${localSizeInBytes}/${formatBytes(remoteFileSize)}`.blue);
+        // console.log(`Video already downloaded: ${dest.split('/').pop()} - ${localSizeInBytes}/${formatBytes(remoteFileSize)}`.blue);
         // downloadBars.create(100, 100, { eta: 0, filename: dest })
-        return;
+        return Promise.resolve();
     } else {
         logger.write(`${new Date().toISOString()} Compare materials: ${localSizeInBytes} - ${formatBytes(parseInt(remoteFileSize))}  => ${parseInt(localSize) === parseInt(remoteFileSize)} for file ${dest.split('/').pop()} of ${url} \n`);
         // ms.update(dest, { text: `${index} Start download video: ${dest.split('/').pop()} - ${localSizeInBytes}/${formatBytes(remoteFileSize)} ` });
         // console.log(`${index} Start ytdl download: ${dest.split('/').pop()} - ${localSizeInBytes}/${formatBytes(remoteFileSize)} `);
-        return await downloadVideo(url, dest, {
+        return await download(url, dest, {
             localSizeInBytes,
             remoteSizeInBytes: formatBytes(remoteFileSize),
             downFolder,
