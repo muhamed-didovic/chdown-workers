@@ -1,5 +1,35 @@
 [
   {
+    "second_title": "Кинопроизводство и Сторителлинг",
+    "title": "Filmmaking & Storytelling 30-Day Class with Casey Neista",
+    "value": "https://coursehunter.net/course/kinoproizvodstvo-i-storitelling"
+  },
+  {
+    "second_title": "Закрепляем TypeScript",
+    "title": "Making TypeScript Stick",
+    "value": "https://coursehunter.net/course/zakreplyaem-typescript"
+  },
+  {
+    "second_title": "Full-Stack TypeScript (с Node.js, React and GraphQL)",
+    "title": "Full-Stack TypeScript (feat. Node.js, React and GraphQL)",
+    "value": "https://coursehunter.net/course/full-stack-typescript-s-node-js-react-and-graphql"
+  },
+  {
+    "second_title": "Интенсивный курс: Комплексное обучение JavaScript",
+    "title": "Интенсивный курс: Комплексное обучение JavaScript",
+    "value": "https://coursehunter.net/course/intensivnyy-kurs-kompleksnoe-obuchenie-javascript"
+  },
+  {
+    "second_title": "React Интенсивный курс для программистов 2022",
+    "title": "React Интенсивный курс для программистов",
+    "value": "https://coursehunter.net/course/react-intensivnyy-kurs-dlya-programmistov-2022"
+  },
+  {
+    "second_title": "Vue 3. Интенсивный курс для программистов",
+    "title": "Vue 3. Интенсивный курс для программистов",
+    "value": "https://coursehunter.net/course/vue-3-intensivnyy-kurs-dlya-programmistov"
+  },
+  {
     "second_title": "React: Разработка через Тестирование",
     "title": "React with Test Driven Development",
     "value": "https://coursehunter.net/course/razrabotka-react-cherez-testirovanie"
