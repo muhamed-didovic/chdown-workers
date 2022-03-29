@@ -48,7 +48,7 @@ module.exports = class Scheduler {
         try {
             await this._parseNext(++this._page, this._perPage)
             this._parsedPages++
-            this._endPage ? this.resolveIfDone() : this._next()
+            this._endPage ? this.resolveIfDone() : await this._next()
         } catch (err) {
             this._deffer.reject(err)
         }
