@@ -1,6 +1,5 @@
 const Scheduler = require('./Scheduler')
 const sanitize = require('sanitize-filename')
-const fs = require("fs-extra");
 
 module.exports = class CourseScheduler extends Scheduler {
 

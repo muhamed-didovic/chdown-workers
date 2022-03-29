@@ -1,6 +1,5 @@
 const Scheduler = require('./Scheduler')
 const sanitize = require('sanitize-filename')
-const { curry } = require("lodash");
 
 module.exports = class AllScheduler extends Scheduler {
 

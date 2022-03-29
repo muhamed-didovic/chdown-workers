@@ -2,12 +2,11 @@ const autobind = require('auto-bind')
 const fs = require('fs-extra')
 const Client = require("./Client");
 const path = require("path");
-const ytdl = require('ytdl-run')
+// const ytdl = require('ytdl-run')
 
 class Worker {
     constructor() {
         this._client = null
-        this._overwrite = true
         this._baseDir = null
 
         autobind(this)
@@ -15,7 +14,6 @@ class Worker {
 
     init({ saved, overwrite, baseDir }) {
         this._client = Client.restore(saved)
-        this._overwrite = overwrite
         this._baseDir = baseDir
     }
 
@@ -55,9 +53,7 @@ class Worker {
         // pathLogger.write(`Path for fileName: ${fileName}, downDir: ${downDir}, _baseDir: ${this._baseDir}\n`)
 
         downDir = path.join(this._baseDir, downDir)
-        const downPath = path.join(downDir, fileName)
-
-        //if (!this._overwrite && await fs.pathExists(downPath)) return
+        // const downPath = path.join(downDir, fileName)
 
         await fs.ensureDir(downDir)
         // const videoLogger = await fs.createWriteStream(`${downDir}${path.sep}videos.txt`, { flags: 'a' }) //fs.ensureFile(`${downDir}${path.sep}videos.txt`)

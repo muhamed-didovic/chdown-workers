@@ -1,8 +1,7 @@
 const path = require('path')
-const { CookieJar } = require("tough-cookie");
 const prompts = require("prompts");
-const isValidPath = require("is-valid-path");
-const meow = require("meow");
+const isValidPath = require("is-valid-path")
+const meow = require("meow")
 const fs = require("fs-extra")
 const cpus = require('os').cpus().length
 

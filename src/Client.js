@@ -1,15 +1,13 @@
 const { CookieJar } = require('tough-cookie')
 const jarGot = require('jar-got')
-const got = require('got')
 const fs = require('fs')
 const path = require("path");
+const cheerio = require('cheerio')
 
 const downOverYoutubeDL = require("./helpers/downOverYoutubeDL")
-const cheerio = require('cheerio')
-const fileSize = require('promisify-remote-file-size')
-const Bluebird = require('bluebird');
-const Promise = require("bluebird");
-Bluebird.config({ longStackTraces: true });
+
+const Bluebird = require('bluebird')
+Bluebird.config({ longStackTraces: true })
 global.Promise = Bluebird;
 
 module.exports = class Client {
