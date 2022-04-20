@@ -1,8 +1,9 @@
 const { CookieJar } = require('tough-cookie')
 const jarGot = require('jar-got')
-const fs = require('fs')
+const fs = require('fs-extra')
 const path = require("path");
 const cheerio = require('cheerio')
+const json2md = require("json2md");
 
 const downOverYoutubeDL = require("./helpers/downOverYoutubeDL")
 
@@ -84,9 +85,6 @@ module.exports = class Client {
 
     async getLessons(page = 1, perPage = 10, json) {
         const courses = json
-        // const logger = await fs.createWriteStream(`j.txt`, { flags: 'a' })
-        // logger.write(JSON.stringify(json, null, 2))
-        // logger.write(`\nDone\n`)
 
         if (!courses[page - 1]) {
             return []
@@ -94,17 +92,7 @@ module.exports = class Client {
 
         const course = courses[page - 1];
         let courseId = await this.getCourseId(course)
-
-        /*[
-          {
-            "title": "1 Introduction | 00:01:40",
-            "file": "https://vss1.coursehunter.net/s/c7372a42f8e366f6891027a8755f24f0/udemy-css-complete-guide/lesson1.mp4",
-            "subtitle": "[English]https://vss1.coursehunter.net/udemy-css-complete-guide/lesson1.srt",
-            "id": "c10681"
-          },
-        ]  */
         const { body: seriesList } = await this._got(`https://coursehunter.net/course/${courseId}/lessons`, { json: true })//&page=${page}&per_page=${perPage}
-
 
         return [{
             label  : course?.second_title,
@@ -115,59 +103,32 @@ module.exports = class Client {
 
     async downArchive(url, downDir, fileName, codeFlag, zipFlag) {
         const downPath = path.join(downDir, fileName);
-        /*const errorsLogger = await fs.createWriteStream(`material_errors.txt`, { flags: 'a' })
-        let remoteFileSize = 0;
-        try {
-            remoteFileSize = await fileSize(url); //await fileSize(encodeURI(url));
-        } catch (err) {
-            if (err.message === 'Received invalid status code: 404') {
-                errorsLogger.write(`${new Date().toISOString()} ERROR WITH THE URL ${url}, Error message: ${err.message} \n`);
-                return Promise.resolve();
-            }
+
+        if ((!codeFlag && url.includes('code')) || (!zipFlag && !url.includes('code'))) {//(parseInt(localFileSize) === parseInt(remoteFileSize)) ||
+            //resolve()
+            return Promise.resolve();
+        } else {
+            return await downOverYoutubeDL(url, downPath, downDir)
         }
-        let localFileSize = this.getFilesizeInBytes(downPath);
-        const videoLogger = await fs.createWriteStream(`sizes_material.txt`, { flags: 'a' })*/
 
-        // return await new Promise((resolve, reject) => {
-            /*videoLogger.write(`${new Date().toISOString()} Compare materials: ${this.formatBytes(parseInt(localFileSize))} - ${this.formatBytes(parseInt(remoteFileSize))}  => ${parseInt(localFileSize) === parseInt(remoteFileSize)} for file ${downPath} of ${url} \n`);
-            if ((parseInt(localFileSize) !== parseInt(remoteFileSize))) {
-                videoLogger.write(`${new Date().toISOString()} Compare materials: ${this.formatBytes(parseInt(localFileSize))} - ${this.formatBytes(parseInt(remoteFileSize))}  => ${parseInt(localFileSize) === parseInt(remoteFileSize)} for file ${downPath.split('/').pop()} of ${url} \n`);
-            }*/
-            if ((!codeFlag && url.includes('code')) || (!zipFlag && !url.includes('code'))) {//(parseInt(localFileSize) === parseInt(remoteFileSize)) ||
-                //resolve()
-                return Promise.resolve();
-            } else {
+    }
 
-                return await downOverYoutubeDL(url, downPath, downDir)
-
-                /*this._got
-                    .stream(url, {
-                        retry: {
-                            limit: 50
-                        }
-                    })
-                    .on('error', (err) => {
-                        errorsLogger.write(`${new Date().toISOString()} Error with url: ${url} \n`);
-                        // errorsLogger.write(err);
-                        return reject(err)
-                    })
-                    .once('retry', (retryCount, error, createRetryStream) => {
-                        errorsLogger.write(`${new Date().toISOString()} Error with url: ${url} retyting ${retryCount} \n`);
-                    })
-                    .pipe(fs.createWriteStream(downPath))
-                    /!*.on('error', (err) => {
-                        console.log('2tu smo', err);
-                        errorsLogger.write('2IMAMO ERROR');
-                        errorsLogger.write(err);
-                        reject(err)
-                    })*!/
-                    .on('finish', () => {
-                        videoLogger.write(`${new Date().toISOString()} Done for file ${downPath.split('/').pop()} of ${url} Compare:${this.formatBytes(parseInt(localFileSize))} - ${this.formatBytes(parseInt(remoteFileSize))} \n`);
-                        return resolve()
-                    })*/
-
+    async downNotes(course, downDir) {
+        await fs.ensureDir(downDir)
+        const md = json2md([
+            { h1: "Resources " },
+            {
+                link: [
+                    ...(course.notes &&
+                        [course.notes.map(c => ({
+                            'title' : c.link,
+                            'source': c.link
+                        }))]
+                    )
+                ]
             }
-        //})
+        ])
+        await fs.writeFile(path.join(downDir, `${course.url.split('/').pop()}.md`), md, 'utf8')//-${Date.now()}
     }
 
     async downSubtitle(signedUrl, downPath) {
@@ -216,58 +177,11 @@ module.exports = class Client {
 
     async downVideoBySigned(url, downDir, fileName) {
         const downPath = path.join(downDir, fileName)
-        /*let remoteFileSize = 0;
-        const errorsLogger = await fs.createWriteStream(`videos_errors.txt`, { flags: 'a' })
-        try {
-            remoteFileSize = await fileSize(url); //await fileSize(encodeURI(url));
-        } catch (err) {
-            if (err.message === 'Received invalid status code: 404') {
-                errorsLogger.write(`${new Date().toISOString()} ERROR WITH THE URL ${url}, Error message: ${err.message} \n`);
-                return Promise.resolve();
-            }
-        }*/
-
-        // let localFileSize = this.getFilesizeInBytes(downPath);
-
-        // const videoLogger = await fs.createWriteStream(`sizes.txt`, { flags: 'a' })
-        // return new Promise((resolve, reject) => {
-        //     videoLogger.write(`${new Date().toISOString()} Compare: ${this.formatBytes(parseInt(localFileSize))} - ${this.formatBytes(parseInt(remoteFileSize))}  => ${parseInt(localFileSize) === parseInt(remoteFileSize)} for file ${downPath} of ${url} \n`);
-            /*if (parseInt(localFileSize) === parseInt(remoteFileSize)) {
-                //resolve()
-                return Promise.resolve();
-            } else {*/
-
-                return await downOverYoutubeDL(url, downPath, downDir)
-                /*this._got
-                    .stream(url)
-                    .on('error', err => {
-                        reject(err)
-                    })
-                    .pipe(fs.createWriteStream(downPath))
-                    /!*.on('downloadProgress', progress => {
-                      videoLogger.write(`111transfered: ${progress.transferred} = total: ${progress.total} \n`);
-                    })
-                    .on('progress', progress => {
-                      videoLogger.write(`22transfered: ${progress.transferred} = total: ${progress.total} \n`);
-                    })*!/
-                    .on('error', reject)
-                    .on('finish', resolve)*/
-
-            //}
-        // })
+        return await downOverYoutubeDL(url, downPath, downDir)
     }
 }
 
 function formatLessons(lessons) {
-    /*[
-        {
-          title: '1 part 1 | 00:51:36',
-          file: 'https://vss5.coursehunter.net/s/c7106a0e44434870d35a52d324662ea5/fm-wasynviz/lesson1.mp4',
-          subtitle: '[English]',
-          id: 'c41931'
-        }
-      ]*/
-
     return lessons
         .filter(lesson => lesson && lesson.file)
         .map((lesson, i) => {

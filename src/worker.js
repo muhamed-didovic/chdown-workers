@@ -48,6 +48,16 @@ class Worker {
         }
     }
 
+    async downNotes(course, downDir) {
+        downDir = path.join(this._baseDir, downDir)
+
+        try {
+            await this._client.downNotes(course, downDir)
+        } catch (err) {
+            throw err
+        }
+    }
+
     async downLessonVideo(url, downDir, fileName) {//{ signedUrl, mpdUrl }
         // const pathLogger = await fs.createWriteStream(`path.txt`, { flags: 'a' })
         // pathLogger.write(`Path for fileName: ${fileName}, downDir: ${downDir}, _baseDir: ${this._baseDir}\n`)

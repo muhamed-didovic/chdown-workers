@@ -9,6 +9,10 @@ const scrape = require('ch-scrape');
 const prompt = require('./cli')
 const { Client, AllScheduler, ArchiveScheduler } = require('./src')
 
+const Bluebird = require('bluebird')
+Bluebird.config({ longStackTraces: true })
+global.Promise = Bluebird;
+
 const ora = require("ora");
 const logger = ora();
 //const concurrency = Math.min(8, cpus)//8

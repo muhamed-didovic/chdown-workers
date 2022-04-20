@@ -81,6 +81,10 @@ module.exports = class Scheduler {
         await this._workers.downSubtitleFile(subtitle, downDir, subtitleName)
     }
 
+    async _downNotes(course, downDir) {
+        await this._workers.downNotes(course, downDir)
+    }
+
     async _downLessonArchive(url, downDir) {
         this._totals++
         await this._workers.downArchive(url, downDir, this._code, this._zip)

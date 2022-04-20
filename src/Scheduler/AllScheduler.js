@@ -1,5 +1,6 @@
 const Scheduler = require('./Scheduler')
 const sanitize = require('sanitize-filename')
+const path = require("path");
 
 module.exports = class AllScheduler extends Scheduler {
 
@@ -39,15 +40,22 @@ module.exports = class AllScheduler extends Scheduler {
     }
 
     async sanitizeAndDownload(course, index, downDir, lesson) {
-        let filename = sanitize(`${course.names[index]}.mp4`)
-        let subtitleName = sanitize(`${course.names[index]}.srt`)
-
-        //download subtitle
-        if (this._subtitle && course?.subtitles && course?.subtitles.length > 0 && !!course?.subtitles[index]) {
-            await this._downLessonSubtitle(course.subtitles[index], downDir, subtitleName)
-        }
-
-        //download video
-        await this._downLessonVideo(lesson, downDir, filename)
+        await Promise.all([
+            (async () => {
+                //download subtitle
+                let subtitleName = sanitize(`${course.names[index]}.srt`)
+                if (this._subtitle && course?.subtitles && course?.subtitles.length > 0 && !!course?.subtitles[index]) {
+                    await this._downLessonSubtitle(course.subtitles[index], downDir, subtitleName)
+                }
+            })(),
+            (async () => {
+                //download video
+                let filename = sanitize(`${course.names[index]}.mp4`)
+                await this._downLessonVideo(lesson, downDir, filename)
+            })(),
+            (async () => {
+                await this._downNotes(course, downDir)
+            })(),
+        ])
     }
 }
