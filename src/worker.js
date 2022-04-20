@@ -2,7 +2,6 @@ const autobind = require('auto-bind')
 const fs = require('fs-extra')
 const Client = require("./Client");
 const path = require("path");
-// const ytdl = require('ytdl-run')
 
 class Worker {
     constructor() {

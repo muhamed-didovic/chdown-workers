@@ -40,14 +40,7 @@ const logger = ora();
         //prepare workers
         workers = new JestWorker(require.resolve('./src/worker'), { numWorkers: inputs.concurrency });
         const client = new Client()
-
-        //const loginMsg = ora('attempting login..').start()
-        //let token = await client.attemptLogin(email, password)
-        /*if (!await client.attemptLogin(email, password)) {
-          return loginMsg.fail('login failed. plz correct email, password.')
-        }*/
-        //loginMsg.succeed('login success.')
-
+        
         // for worker
         const initMsg = ora(`preparing workers with concurrency: ${inputs.concurrency}..`).start()
 
