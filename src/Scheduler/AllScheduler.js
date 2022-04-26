@@ -54,6 +54,7 @@ module.exports = class AllScheduler extends Scheduler {
                 await this._downLessonVideo(lesson, downDir, filename)
             })(),
             (async () => {
+                //download notes
                 await this._downNotes(course, downDir)
             })(),
         ])

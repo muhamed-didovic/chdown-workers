@@ -1,6 +1,6 @@
 {
     "name": "chdown-workers",
-    "version": "0.8.0",
+    "version": "0.8.1",
     "description": "Scrape and download videos from coursehunter.net with workers",
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1"
@@ -26,9 +26,9 @@
     "dependencies": {
         "@byungi/p-retry": "^0.2.2",
         "auto-bind": "^4.0.0",
-        "axios": "^0.26.1",
+        "axios": "^0.27.1",
         "bluebird": "^3.7.2",
-        "ch-scrape": "^0.14.6",
+        "ch-scrape": "^0.14.7",
         "cheerio": "latest",
         "colors": "^1.4.0",
         "fs-extra": "^10.1.0",
