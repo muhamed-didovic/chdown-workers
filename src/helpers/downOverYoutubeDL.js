@@ -24,7 +24,7 @@ const download = (url, dest, {
     errorsLogger
 }) => new Promise((resolve, reject) => {
     const videoLogger = createLogger(downFolder);
-    fs.removeSync(dest) // not supports overwrite..
+    // fs.removeSync(dest) // not supports overwrite..
 
     // console.log(`to be processed by youtube-dl... ${dest.split('/').pop()} Found:${localSizeInBytes}/${remoteSizeInBytes}`)
     const youtubeDlWrap = new youtubedl()
@@ -36,7 +36,7 @@ const download = (url, dest, {
         // .on("youtubeDlEvent", (eventType, eventData) => console.log(eventType, eventData))
         .on("error", (error) => {
             errorsLogger.write(`${new Date().toISOString()} Error with url: ${url} ERROR: ${error.message}\n`);
-           /* fs.unlink(dest, (err) => {
+            /*fs.unlink(dest, (err) => {
                 return reject(error);
             });*/
             return reject(error);

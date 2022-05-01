@@ -38,7 +38,7 @@ class Worker {
     async downSubtitleFile(url, downDir, fileName) {
         downDir = path.join(this._baseDir, downDir)
         const downPath = path.join(downDir, fileName)
-        await fs.ensureDir(downDir)
+        //await fs.ensureDir(downDir)
 
         try {
             await this._client.downSubtitle(url, downPath)
@@ -49,7 +49,6 @@ class Worker {
 
     async downNotes(course, downDir) {
         downDir = path.join(this._baseDir, downDir)
-
         try {
             await this._client.downNotes(course, downDir)
         } catch (err) {
@@ -58,8 +57,8 @@ class Worker {
     }
 
     async downLessonVideo(url, downDir, fileName) {//{ signedUrl, mpdUrl }
-        // const pathLogger = await fs.createWriteStream(`path.txt`, { flags: 'a' })
-        // pathLogger.write(`Path for fileName: ${fileName}, downDir: ${downDir}, _baseDir: ${this._baseDir}\n`)
+        const pathLogger = await fs.createWriteStream(`path.txt`, { flags: 'a' })
+        pathLogger.write(`Path for fileName: ${fileName}, downDir: ${downDir}, _baseDir: ${this._baseDir}\n`)
 
         downDir = path.join(this._baseDir, downDir)
         // const downPath = path.join(downDir, fileName)

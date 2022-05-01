@@ -40,7 +40,7 @@ const logger = ora();
         //prepare workers
         workers = new JestWorker(require.resolve('./src/worker'), { numWorkers: inputs.concurrency });
         const client = new Client()
-        
+
         // for worker
         const initMsg = ora(`preparing workers with concurrency: ${inputs.concurrency}..`).start()
 
@@ -49,7 +49,7 @@ const logger = ora();
                 .map(_ => workers.init({
                     saved    : client.save(),
                     baseDir  : inputs.downDir, //path.resolve(process.cwd(), 'videos/')
-                    overwrite: true
+                    //overwrite: true
                 }))
         )
 

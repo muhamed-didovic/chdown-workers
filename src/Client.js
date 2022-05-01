@@ -114,7 +114,7 @@ module.exports = class Client {
     }
 
     async downNotes(course, downDir) {
-        await fs.ensureDir(downDir)
+        // await fs.ensureDir(downDir)
         const md = json2md([
             { h1: "Resources " },
             {

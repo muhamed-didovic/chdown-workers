@@ -1,6 +1,6 @@
 const Scheduler = require('./Scheduler')
 const sanitize = require('sanitize-filename')
-const path = require("path");
+const fs = require('fs-extra')
 
 module.exports = class AllScheduler extends Scheduler {
 
@@ -40,6 +40,7 @@ module.exports = class AllScheduler extends Scheduler {
     }
 
     async sanitizeAndDownload(course, index, downDir, lesson) {
+        await fs.ensureDir(downDir)
         await Promise.all([
             (async () => {
                 //download subtitle
@@ -55,7 +56,9 @@ module.exports = class AllScheduler extends Scheduler {
             })(),
             (async () => {
                 //download notes
-                await this._downNotes(course, downDir)
+                if (course.notes.length > 0) {
+                    await this._downNotes(course, downDir)
+                }
             })(),
         ])
     }
