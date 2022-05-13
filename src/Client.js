@@ -48,9 +48,7 @@ module.exports = class Client {
             'method': 'PUT',
             headers : {
                 // "Cookie": "user_ident=4921da7b-0a69-4195-a1a5-0fca92fabbb6; CHUNTERS=bmfj3ul4051ba6rso310hiapak; accessToken=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiIsImp0aSI6IjRmMWcyM2ExMmFhIn0.eyJpc3MiOiJodHRwczpcL1wvY291cnNlaHVudGVyLm5ldCIsImF1ZCI6Imh0dHBzOlwvXC9jb3Vyc2VodW50ZXIubmV0IiwianRpIjoiNGYxZzIzYTEyYWEiLCJpYXQiOjE2MzY2NDQ5ODcsIm5iZiI6MTYzNjY0NTA0NywiZXhwIjoxNjM3MjQ5Nzg3LCJ1c2VyX2lkIjoiMjIwODMiLCJlX21haWwiOiJhYmhhZ3NhaW5AZ21haWwuY29tIn0.P-RJYUa2s2-lN9uuKxhWOUVQUgK8NUBcJ3d7vEnML_M; ch_quiz=a1d2bae713d864293b9220dc291dc3fe",
-                // 'Accept': 'application/json',
                 'Content-Type': 'application/json',
-                // 'Access-Control-Allow-Origin': '*'
             },
             body    : JSON.stringify({ 'e_mail': email, 'password': pwd })
         })
@@ -162,12 +160,6 @@ module.exports = class Client {
 
                     })
                     .pipe(fs.createWriteStream(downPath))
-                    /*.on('downloadProgress', progress => {
-                      videoLogger.write(`111transfered: ${progress.transferred} = total: ${progress.total} \n`);
-                    })
-                    .on('progress', progress => {
-                      videoLogger.write(`22transfered: ${progress.transferred} = total: ${progress.total} \n`);
-                    })*/
                     .on('error', reject)
                     .on('finish', resolve)
 
