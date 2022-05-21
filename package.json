@@ -1,6 +1,6 @@
 {
     "name": "chdown-workers",
-    "version": "0.8.6",
+    "version": "0.8.7",
     "description": "Scrape and download videos from coursehunter.net with workers",
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1"
@@ -28,14 +28,14 @@
         "auto-bind": "^4.0.0",
         "axios": "^0.27.2",
         "bluebird": "^3.7.2",
-        "ch-scrape": "^0.15.1",
+        "ch-scrape": "^0.15.4",
         "cheerio": "latest",
         "colors": "^1.4.0",
         "fs-extra": "^10.1.0",
         "got": "^11.0.0",
         "is-valid-path": "^0.1.1",
         "jar-got": "^0.1.0",
-        "jest-worker": "^28.0.2",
+        "jest-worker": "^28.1.0",
         "json2md": "^1.12.0",
         "lodash": "^4.17.21",
         "meow": "^9.0.0",
@@ -46,7 +46,7 @@
         "prompts": "^2.4.2",
         "request": "^2.88.2",
         "sanitize-filename": "^1.6.3",
-        "tough-cookie": "^2.5.0",
+        "tough-cookie": "^4.0.0",
         "youtube-dl-wrap": "^2.1.1",
         "ytdl-run": "^0.2.1"
     },
