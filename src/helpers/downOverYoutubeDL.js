@@ -3,7 +3,6 @@ const fileSize = require('promisify-remote-file-size')
 const { formatBytes } = require('./writeWaitingInfo');
 const { createLogger, isCompletelyDownloaded } = require('./fileChecker');
 const path = require('path')
-// const ytdl = require('ytdl-run')
 const fs = require('fs-extra')
 const Promise = require('bluebird')
 const youtubedl = require("youtube-dl-wrap")

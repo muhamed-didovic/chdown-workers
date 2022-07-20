@@ -82,9 +82,6 @@ class Worker {
             // logger.write(`Downloaded normally, file: ${fileName}\n`)
         } catch (err) {
             //await fs.remove(downPath) // not supports overwrite..
-            //await ytdl([mpdUrl, '-o', path.toNamespacedPath(downPath)])
-            // videoLogger.write(`${fileName}\n`);
-            // logger.write(`Downloaded over ytdl, file: ${fileName}\n`)
             throw err
         }
     }
